@@ -4,7 +4,7 @@ AI 驱动的股票分析面板，输入股票代码获取实时行情，通过 D
 
 ## 在线访问
 
-> 部署后填入 Render.com URL
+https://ai-stock-dashboard-bqb3.onrender.com
 
 ## 技术栈
 
