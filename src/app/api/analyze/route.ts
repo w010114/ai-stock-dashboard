@@ -13,16 +13,35 @@ export async function POST(request: Request) {
       );
     }
 
-    const prompt = `Analyze this stock:
-- Symbol: ${symbol}
-- Price: $${price}
-- Change: $${change}
+    const changePercent = price - change > 0
+      ? ((change / (price - change)) * 100).toFixed(2)
+      : "0.00";
 
-Return only valid JSON (no markdown, no code fences):
+    const prompt = `You are a professional stock analyst. Analyze this stock:
+
+Symbol: ${symbol}
+Current Price: $${price}
+Change: $${change} (${changePercent}%)
+
+Provide a detailed analysis covering these aspects:
+1. Price trend and momentum
+2. Key technical levels (support/resistance)
+3. Market sentiment drivers
+4. Risk factors to watch
+5. Short-term outlook (1-4 weeks)
+
+Return ONLY valid JSON (no markdown, no code fences, no extra text):
 {
-  "summary": "<one sentence analysis>",
-  "sentiment": "Bullish | Neutral | Bearish",
-  "risk_level": "Low | Medium | High"
+  "summary": "<a concise 1-2 sentence overall assessment>",
+  "sentiment": "Bullish" | "Neutral" | "Bearish",
+  "risk_level": "Low" | "Medium" | "High",
+  "points": [
+    "<Trend & Momentum: brief analysis>",
+    "<Technical Levels: key support and resistance>",
+    "<Market Drivers: what's moving the stock>",
+    "<Risk Factors: what to watch out for>",
+    "<Outlook: short-term expectation>"
+  ]
 }`;
 
     const response = await client.chat.completions.create({
@@ -47,6 +66,8 @@ Return only valid JSON (no markdown, no code fences):
       ? result.risk_level
       : "Medium";
 
+    const points = Array.isArray(result.points) ? result.points : [];
+
     const analysis = {
       symbol,
       price,
@@ -54,6 +75,7 @@ Return only valid JSON (no markdown, no code fences):
       summary: result.summary ?? "",
       sentiment,
       risk_level,
+      points,
     };
 
     const { error: dbError } = await supabase.from("analyses").insert(analysis);

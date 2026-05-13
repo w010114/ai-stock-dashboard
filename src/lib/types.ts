@@ -12,5 +12,6 @@ export interface Analysis {
   summary: string;
   sentiment: "Bullish" | "Neutral" | "Bearish";
   risk_level: "Low" | "Medium" | "High";
+  points: string[];
   created_at?: string;
 }

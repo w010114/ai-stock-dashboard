@@ -203,11 +203,21 @@ export default function Home() {
             <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-4">
               AI Analysis
             </h2>
-            <div className="flex gap-3 mb-4">
+            <div className="flex gap-3 mb-5">
               <SentimentBadge value={analysis.sentiment} />
               <RiskBadge value={analysis.risk_level} />
             </div>
-            <p className="text-zinc-300 leading-relaxed">{analysis.summary}</p>
+            <p className="text-zinc-200 leading-relaxed mb-6 pb-6 border-b border-white/[0.06]">
+              {analysis.summary}
+            </p>
+            <div className="space-y-3">
+              {analysis.points.map((point, i) => (
+                <div key={i} className="flex gap-3">
+                  <span className="shrink-0 mt-1 w-1.5 h-1.5 rounded-full bg-blue-500/60" />
+                  <span className="text-sm text-zinc-400 leading-relaxed">{point}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
