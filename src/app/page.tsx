@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import type { Analysis } from "@/lib/types";
 
 interface StockData {
@@ -54,10 +54,6 @@ export default function Home() {
       }
     } catch {}
   }, []);
-
-  useEffect(() => {
-    loadHistory();
-  }, [loadHistory]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
