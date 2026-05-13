@@ -211,12 +211,25 @@ export default function Home() {
               {analysis.summary}
             </p>
             <div className="space-y-3">
-              {analysis.points.map((point, i) => (
-                <div key={i} className="flex gap-3">
-                  <span className="shrink-0 mt-1 w-1.5 h-1.5 rounded-full bg-blue-500/60" />
-                  <span className="text-sm text-zinc-400 leading-relaxed">{point}</span>
-                </div>
-              ))}
+              {analysis.points.map((point, i) => {
+                const icons = ["📊", "📐", "📰", "⚠️", "🔮"];
+                const labels = [
+                  "Trend & Momentum",
+                  "Technical Levels",
+                  "Market Drivers",
+                  "Risk Factors",
+                  "Outlook",
+                ];
+                return (
+                  <div key={i} className="flex gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                    <span className="text-base shrink-0">{icons[i]}</span>
+                    <div className="min-w-0">
+                      <span className="text-xs font-semibold text-zinc-500">{labels[i]}</span>
+                      <p className="text-sm text-zinc-300 leading-relaxed mt-0.5">{point}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
