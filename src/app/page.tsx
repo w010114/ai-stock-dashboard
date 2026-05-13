@@ -9,6 +9,34 @@ interface StockData {
   change: number;
 }
 
+function SentimentBadge({ value }: { value: string }) {
+  const colors =
+    value === "Bullish"
+      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+      : value === "Bearish"
+      ? "bg-red-500/10 text-red-400 border-red-500/20"
+      : "bg-amber-500/10 text-amber-400 border-amber-500/20";
+  return (
+    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${colors}`}>
+      {value}
+    </span>
+  );
+}
+
+function RiskBadge({ value }: { value: string }) {
+  const colors =
+    value === "Low"
+      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+      : value === "High"
+      ? "bg-red-500/10 text-red-400 border-red-500/20"
+      : "bg-amber-500/10 text-amber-400 border-amber-500/20";
+  return (
+    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${colors}`}>
+      Risk: {value}
+    </span>
+  );
+}
+
 export default function Home() {
   const [symbol, setSymbol] = useState("AAPL");
   const [loading, setLoading] = useState(false);
@@ -67,133 +95,161 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-center">AI Stock Dashboard</h1>
+    <div className="min-h-screen bg-[#030712] text-zinc-100 relative overflow-hidden">
+      {/* Background glow */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-violet-600/8 rounded-full blur-[100px]" />
+      </div>
 
+      <div className="relative max-w-2xl mx-auto px-6 py-12 space-y-10">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-extrabold tracking-tight">
+            <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
+              AI Stock Dashboard
+            </span>
+          </h1>
+          <p className="text-zinc-500 text-sm">DeepSeek-powered stock analysis</p>
+        </div>
+
+        {/* Search */}
         <form onSubmit={handleSubmit} className="flex gap-3">
-          <input
-            type="text"
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-            className="flex-1 px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 focus:outline-none focus:border-blue-500 text-white"
-            placeholder="Enter stock symbol"
-          />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+              className="w-full h-12 px-5 rounded-xl bg-white/[0.03] border border-white/[0.08] focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 text-white placeholder-zinc-500 transition-all"
+              placeholder="Enter stock symbol"
+            />
+          </div>
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg font-medium transition-colors"
+            className="h-12 px-6 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-600/25 hover:shadow-blue-500/40 active:scale-95"
           >
-            {loading ? "Loading..." : "Analyze"}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Loading
+              </span>
+            ) : (
+              "Analyze"
+            )}
           </button>
         </form>
 
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <p className="mt-3 text-zinc-400">Fetching data...</p>
-          </div>
-        )}
-
+        {/* Error */}
         {error && (
-          <div className="p-4 bg-red-900/30 border border-red-800 rounded-lg text-red-400">
+          <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl text-red-400 text-sm">
             {error}
           </div>
         )}
 
+        {/* Loading skeleton */}
+        {loading && !stock && (
+          <div className="space-y-4 animate-pulse">
+            <div className="h-32 bg-white/[0.03] border border-white/[0.06] rounded-2xl" />
+            <div className="h-40 bg-white/[0.03] border border-white/[0.06] rounded-2xl" />
+          </div>
+        )}
+
+        {/* Stock Card */}
         {stock && (
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider mb-3">
+          <div className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl backdrop-blur-sm hover:border-white/[0.1] transition-all duration-300">
+            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-4">
               Stock Data
             </h2>
-            <div className="flex items-end gap-4">
-              <span className="text-3xl font-bold">{stock.symbol}</span>
-              <span className="text-3xl font-mono">${stock.price.toFixed(2)}</span>
-              <span
-                className={`text-lg font-medium ${
-                  stock.change >= 0 ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {stock.change >= 0 ? "+" : ""}
-                {stock.change.toFixed(2)}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {analysis && (
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider mb-3">
-              AI Analysis
-            </h2>
-            <p className="text-lg mb-4">{analysis.summary}</p>
-            <div className="flex gap-3">
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  analysis.sentiment === "Bullish"
-                    ? "bg-green-900/40 text-green-400"
-                    : analysis.sentiment === "Bearish"
-                    ? "bg-red-900/40 text-red-400"
-                    : "bg-zinc-800 text-zinc-300"
-                }`}
-              >
-                {analysis.sentiment}
-              </span>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  analysis.risk_level === "Low"
-                    ? "bg-green-900/40 text-green-400"
-                    : analysis.risk_level === "High"
-                    ? "bg-red-900/40 text-red-400"
-                    : "bg-yellow-900/40 text-yellow-400"
-                }`}
-              >
-                Risk: {analysis.risk_level}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {history.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
-              History
-            </h2>
-            {history.map((item) => (
-              <div
-                key={item.id}
-                className="p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-lg flex items-center justify-between"
-              >
-                <div>
-                  <span className="font-bold mr-2">{item.symbol}</span>
-                  <span className="text-zinc-400 text-sm">{item.summary}</span>
-                </div>
-                <div className="flex gap-2">
-                  <span
-                    className={`px-2 py-0.5 rounded text-xs font-medium ${
-                      item.sentiment === "Bullish"
-                        ? "bg-green-900/40 text-green-400"
-                        : item.sentiment === "Bearish"
-                        ? "bg-red-900/40 text-red-400"
-                        : "bg-zinc-800 text-zinc-300"
-                    }`}
-                  >
-                    {item.sentiment}
+            <div className="flex items-end justify-between">
+              <div className="flex items-end gap-4">
+                <span className="text-4xl font-extrabold tracking-tight">
+                  {stock.symbol}
+                </span>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-4xl font-mono font-bold tracking-tight tabular-nums">
+                    ${stock.price.toFixed(2)}
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded text-xs font-medium ${
-                      item.risk_level === "Low"
-                        ? "bg-green-900/40 text-green-400"
-                        : item.risk_level === "High"
-                        ? "bg-red-900/40 text-red-400"
-                        : "bg-yellow-900/40 text-yellow-400"
+                    className={`text-lg font-semibold tabular-nums ${
+                      stock.change >= 0 ? "text-emerald-400" : "text-red-400"
                     }`}
                   >
-                    {item.risk_level}
+                    {stock.change >= 0 ? "+" : ""}
+                    {stock.change.toFixed(2)}
                   </span>
                 </div>
               </div>
-            ))}
+              <div
+                className={`px-3 py-1.5 rounded-lg text-sm font-bold ${
+                  stock.change >= 0
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    : "bg-red-500/10 text-red-400 border border-red-500/20"
+                }`}
+              >
+                {stock.change >= 0 ? "↑" : "↓"}{" "}
+                {stock.price > 0
+                  ? Math.abs((stock.change / (stock.price - stock.change)) * 100).toFixed(2)
+                  : "0.00"}
+                %
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Analysis Card */}
+        {analysis && (
+          <div className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl backdrop-blur-sm hover:border-white/[0.1] transition-all duration-300">
+            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-4">
+              AI Analysis
+            </h2>
+            <div className="flex gap-3 mb-4">
+              <SentimentBadge value={analysis.sentiment} />
+              <RiskBadge value={analysis.risk_level} />
+            </div>
+            <p className="text-zinc-300 leading-relaxed">{analysis.summary}</p>
+          </div>
+        )}
+
+        {/* History */}
+        {history.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">
+                History
+              </h2>
+              <div className="h-px flex-1 bg-white/[0.06]" />
+            </div>
+            <div className="space-y-2">
+              {history.map((item) => (
+                <div
+                  key={item.id}
+                  className="group p-4 bg-white/[0.01] border border-white/[0.04] rounded-xl flex items-center justify-between hover:bg-white/[0.03] hover:border-white/[0.08] transition-all duration-200"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <span className="text-sm font-bold tracking-tight shrink-0">
+                      {item.symbol}
+                    </span>
+                    <span className="text-zinc-500 text-sm truncate hidden sm:block">
+                      {item.summary}
+                    </span>
+                  </div>
+                  <div className="flex gap-2 shrink-0 ml-4">
+                    <SentimentBadge value={item.sentiment} />
+                    <RiskBadge value={item.risk_level} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && !stock && history.length === 0 && (
+          <div className="text-center py-16">
+            <div className="text-5xl mb-4">📈</div>
+            <p className="text-zinc-500">Enter a stock symbol to get started</p>
+            <p className="text-zinc-600 text-sm mt-1">Try AAPL, TSLA, or GOOGL</p>
           </div>
         )}
       </div>
